@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f6f0"><meta name="description" content="Find and follow technology deals across popular retailers.">
+  <title>Tech Deals — Find your next great deal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700&family=Playfair+Display:ital,wght@0,600;1,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css"><link rel="stylesheet" href="/brand.css">
+</head>
+<body>
+  <header class="topbar"><a class="brand" href="#top"><span class="brand-icon">T</span><span>tech<span class="brand-light">deals</span></span></a><div class="status"><i></i><span id="connection-status">Connecting…</span></div><a class="powered" href="https://docs.tinyfish.ai/" target="_blank" rel="noreferrer">Powered by TinyFish <span>↗</span></a></header>
+  <main id="top">
+    <section class="hero"><div class="eyebrow"><span class="spark">✳</span> Smart shopping starts here</div><h1>Good tech.<br><em>Better prices.</em></h1><p>Search current product listings, inspect offers and keep track of price changes across your favourite stores.</p>
+      <form id="search-form" class="searchbar"><span class="search-symbol">⌕</span><input id="product-query" maxlength="180" placeholder="Search a product, like noise-cancelling headphones" required autocomplete="off"><select id="region" aria-label="Search region"><option value="IN">India</option><option value="US">United States</option></select><button class="button-primary" type="submit">Find deals <span>→</span></button></form>
+      <div class="store-picker"><span class="store-label">SEARCH IN</span><label><input type="checkbox" name="store" value="amazon" checked><span>amazon</span></label><label><input type="checkbox" name="store" value="flipkart" checked><span>Flipkart</span></label><label><input type="checkbox" name="store" value="blinkit" checked><span>blinkit</span></label><label><input type="checkbox" name="store" value="walmart" checked><span>Walmart</span></label></div>
+    </section>
+    <section id="results-section" class="results-section hidden"><div class="section-heading"><div><div class="eyebrow">LIVE LISTINGS</div><h2 id="results-title">Deals for you</h2><p id="results-meta"></p></div><button id="research-results" class="button-outline">✳ Research this category</button></div><div id="results" class="results-grid"></div></section>
+    <section class="features-section"><div class="section-heading"><div><div class="eyebrow">YOUR SHOPPING TOOLKIT</div><h2>Find it. Check it. Track it.</h2></div><p>Six TinyFish capabilities working together to make deal research easier.</p></div>
+      <div class="feature-grid">
+        <article class="feature-card"><span class="feature-icon icon-green">⌕</span><div class="feature-body"><span class="feature-tag">01 · SEARCH</span><h3>Search across stores</h3><p>Search product listings by retailer and region. See source links and snippets to start comparing.</p><span class="feature-hint">Start with the search above ↑</span></div></article>
+        <article class="feature-card"><span class="feature-icon icon-orange">▤</span><div class="feature-body"><span class="feature-tag">02 · FETCH</span><h3>Read a product page</h3><p>Fetch current page content from a known retailer URL.</p><form id="fetch-form" class="inline-form"><input id="fetch-url" type="url" placeholder="Paste a store product URL" required><button type="submit" aria-label="Fetch page">Fetch ↗</button></form></div></article>
+        <article class="feature-card"><span class="feature-icon icon-purple">✧</span><div class="feature-body"><span class="feature-tag">03 · AGENT</span><h3>Inspect the offer</h3><p>Ask TinyFish to browse a listing and report the prices and sale terms shown on the page.</p><form id="agent-form" class="inline-form"><input id="agent-url" type="url" placeholder="Paste a store product URL" required><button type="submit">Inspect ↗</button></form></div></article>
+        <article class="feature-card"><span class="feature-icon icon-yellow">◎</span><div class="feature-body"><span class="feature-tag">04 · RESEARCH</span><h3>Explore the market</h3><p>Get a source-backed report about deals in a product category.</p><form id="research-form" class="inline-form"><input id="research-query" placeholder="e.g. laptop deals this season" required maxlength="500"><button type="submit">Research ↗</button></form></div></article>
+        <article class="feature-card"><span class="feature-icon icon-blue">◷</span><div class="feature-body"><span class="feature-tag">05 · MONITOR</span><h3>Watch for changes</h3><p>Create a recurring page Monitor for a product you want to follow.</p><form id="monitor-form" class="inline-form"><input id="monitor-url" type="url" placeholder="Paste a product page URL" required><select id="monitor-frequency" aria-label="Monitor frequency"><option value="daily">Daily</option><option value="6hours">Every 6 hours</option></select><button type="submit">Watch ↗</button></form></div></article>
+        <article class="feature-card"><span class="feature-icon icon-rose">▣</span><div class="feature-body"><span class="feature-tag">06 · BROWSER</span><h3>Open a browser session</h3><p>Create a TinyFish browser session for direct CDP or Playwright use.</p><form id="browser-form" class="inline-form"><input id="browser-url" type="url" placeholder="Paste a product page URL" required><button type="submit">Open ↗</button></form></div></article>
+      </div>
+    </section>
+    <section class="saved-section"><div><div class="eyebrow">YOUR SHORTLIST</div><h2>Pick up where you left off.</h2><p>Recent product searches are saved in this browser, so you can revisit them with one click.</p></div><div id="saved-list" class="saved-list"><span class="muted">No saved searches yet.</span></div></section>
+    <aside class="disclaimer"><span>ⓘ</span><p>Prices, discounts and stock can change with region, seller and time. Search results are discovery leads; verify the final price, shipping, coupons and terms on the retailer’s page before buying.</p></aside>
+  </main>
+  <footer><a class="brand" href="#top"><span class="brand-icon">T</span><span>tech<span class="brand-light">deals</span></span></a><span>A small project powered by TinyFish web APIs.</span><a href="https://docs.tinyfish.ai/" target="_blank" rel="noreferrer">TinyFish docs ↗</a></footer>
+  <dialog id="result-dialog"><div class="dialog-header"><div><div class="eyebrow" id="dialog-label">TINYFISH RESULT</div><h2 id="dialog-title">Result</h2></div><button id="dialog-close" class="close-button" aria-label="Close dialog">×</button></div><div id="dialog-status" aria-live="polite"></div><pre id="dialog-content"></pre></dialog>
+  <script src="/app.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+/* Clean, compact wordmark typography. */
+.brand {
+  font-family: 'Manrope', 'DM Sans', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -.85px;
+  gap: 9px;
+}
+.brand-light {
+  color: #849087;
+  font-weight: 500;
+  letter-spacing: -.65px;
+}
+.brand-icon {
+  font-family: 'Manrope', 'DM Sans', sans-serif;
+  font-weight: 700;
+}
+footer .brand { font-size: 14px; }
+footer .brand-icon { font-size: 12px; }
