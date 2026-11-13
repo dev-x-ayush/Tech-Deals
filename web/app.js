@@ -21,8 +21,62 @@ function openDialog(title, value, label = 'TINYFISH RESULT', error = false) {
   $('#dialog-status').textContent = '';
   const content = $('#dialog-content');
   content.classList.toggle('error-box', error);
-  content.textContent = printable(value);
-  dialog.showModal();
+  content.innerHTML = `<pre>${escapeHtml(printable(value))}</pre>`;
+  if (!dialog.open) dialog.showModal();
+}
+function openLoadingDialog(title = 'Checking this offer') {
+  $('#dialog-title').textContent = title;
+  $('#dialog-label').textContent = 'PRODUCT CHECK';
+  $('#dialog-status').textContent = 'The offer details will appear here as soon as the store page has been checked.';
+  const content = $('#dialog-content');
+  content.classList.remove('error-box');
+  content.innerHTML = '<div class="agent-loading" role="status"><span class="agent-spinner" aria-hidden="true"></span><span>Reading the retailer listing…</span></div>';
+  if (!dialog.open) dialog.showModal();
+}
+function agentEntries(value, prefix = '') {
+  if (typeof value === 'string') {
+    try { return agentEntries(JSON.parse(value), prefix); } catch { return prefix ? [[prefix, value]] : []; }
+  }
+  if (Array.isArray(value)) return [[prefix || 'Details', value.map((item) => typeof item === 'object' ? printable(item) : String(item)).join(', ')]];
+  if (!value || typeof value !== 'object') return prefix && value != null ? [[prefix, String(value)]] : [];
+  return Object.entries(value).flatMap(([key, item]) => {
+    const name = prefix ? `${prefix} · ${key}` : key;
+    if (item && typeof item === 'object' && !Array.isArray(item)) return agentEntries(item, name);
+    if (Array.isArray(item)) return [[name, item.map((part) => typeof part === 'object' ? printable(part) : String(part)).join(', ')]];
+    return item == null || item === '' ? [] : [[name, String(item)]];
+  });
+}
+function agentKey(key) { return key.toLowerCase().replace(/[^a-z0-9]/g, ''); }
+function openAgentDialog(data, sourceUrl) {
+  $('#dialog-title').textContent = 'Offer details';
+  $('#dialog-label').textContent = 'PRODUCT CHECK';
+  $('#dialog-status').textContent = 'Details read from the retailer listing. Confirm the final price and terms on the store site.';
+  const content = $('#dialog-content');
+  content.classList.remove('error-box');
+  const payload = data?.result ?? data;
+  const entries = agentEntries(payload);
+  const aliases = {
+    product: ['productname', 'product', 'name', 'title', 'itemname'],
+    price: ['displayedprice', 'currentprice', 'saleprice', 'price', 'offerprice'],
+    original: ['originalprice', 'listprice', 'mrp', 'wasprice', 'regularprice'],
+    discount: ['discount', 'discountpercent', 'savings', 'saving'],
+    seller: ['seller', 'merchant', 'soldby'],
+    availability: ['availability', 'stock', 'stockstatus', 'instock'],
+  };
+  const pick = (keys) => entries.find(([key]) => keys.includes(agentKey(key.split(' · ').at(-1))))?.[1];
+  const product = pick(aliases.product) || 'Product offer';
+  const highlights = [
+    ['Price shown', pick(aliases.price)], ['Original price', pick(aliases.original)],
+    ['Discount or savings', pick(aliases.discount)], ['Seller', pick(aliases.seller)],
+    ['Availability', pick(aliases.availability)],
+  ].filter(([, value]) => value);
+  const known = new Set(Object.values(aliases).flat());
+  const extra = entries.filter(([key]) => !known.has(agentKey(key.split(' · ').at(-1))) && !['event','type','purpose'].includes(agentKey(key)));
+  const storeUrl = safeResultUrl(sourceUrl || '');
+  const card = `<section class="offer-summary"><h3>${escapeHtml(product)}</h3><div class="offer-facts">${highlights.length ? highlights.map(([label, value]) => `<div class="offer-fact"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></div>`).join('') : '<p>The Agent did not return recognizable price or stock fields. See the full response below.</p>'}</div>${storeUrl !== '#' ? `<a class="offer-store-link" href="${escapeHtml(storeUrl)}" target="_blank" rel="noopener noreferrer">Open retailer listing ↗</a>` : ''}</section>`;
+  const extraHtml = extra.length ? `<section class="offer-extra"><h4>More details</h4><dl>${extra.map(([key, value]) => `<div><dt>${escapeHtml(key.replace(/ · /g, ' › ').replace(/([a-z])([A-Z])/g, '$1 $2'))}</dt><dd>${escapeHtml(value)}</dd></div>`).join('')}</dl></section>` : '';
+  content.innerHTML = `${card}${extraHtml}<details class="raw-response"><summary>Show full technical response</summary><pre>${escapeHtml(printable(data))}</pre></details>`;
+  if (!dialog.open) dialog.showModal();
 }
 async function api(path, payload = {}) {
   const response = await fetch(path, {
@@ -70,7 +124,8 @@ function renderResults(data) {
   }).join('');
   document.querySelectorAll('.check-offer:not(:disabled)').forEach((button) => button.addEventListener('click', async () => {
     button.disabled = true; button.textContent = 'Checking offer…';
-    try { openDialog('Displayed offer details', await api('/api/analyze', { url: button.dataset.url }), 'TINYFISH AGENT'); }
+    openLoadingDialog();
+    try { openAgentDialog(await api('/api/analyze', { url: button.dataset.url }), button.dataset.url); }
     catch (error) { openDialog('Could not inspect this offer', { error: error.message }, 'TINYFISH AGENT', true); }
     finally { button.disabled = false; button.textContent = 'Check displayed offer with Agent'; }
   }));
@@ -100,7 +155,13 @@ function bindForm(formId, action, payload, title, label) {
     event.preventDefault();
     const button = event.currentTarget.querySelector('button[type="submit"]');
     const oldText = button.textContent; button.disabled = true; button.textContent = 'Working…';
-    try { openDialog(title, await api(action, payload()), label); }
+    try {
+      const formPayload = payload();
+      if (action === '/api/analyze') openLoadingDialog('Checking this offer');
+      const result = await api(action, formPayload);
+      if (action === '/api/analyze') openAgentDialog(result, formPayload.url);
+      else openDialog(title, result, label);
+    }
     catch (error) { openDialog(`${title} failed`, { error: error.message }, label, true); }
     finally { button.disabled = false; button.textContent = oldText; }
   });
@@ -122,3 +183,4 @@ fetch('/api/health').then((response) => response.json()).then((health) => {
   status.parentElement.classList.add(health.tinyfish_configured ? 'ready' : 'missing');
   status.textContent = health.tinyfish_configured ? 'TinyFish connected' : 'API key needed';
 }).catch(() => { $('#connection-status').textContent = 'Server unavailable'; });
+
